@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basketball Shoe Finder Quiz</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .question-container {
+            display: none;
+        }
+
+        .question-container.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .question-text {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 18px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: white;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-next {
+            flex: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-next:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-back {
+            background: #f0f0f0;
+            color: #666;
+            padding: 14px 20px;
+        }
+
+        .btn-back:hover {
+            background: #e0e0e0;
+        }
+
+        .results {
+            display: none;
+            text-align: center;
+        }
+
+        .results.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .results h2 {
+            color: #333;
+            font-size: 26px;
+            margin-bottom: 15px;
+        }
+
+        .results-intro {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .shoe-recommendation {
+            background: #f8f9ff;
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .shoe-name {
+            font-size: 22px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .shoe-reason {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .shoe-features {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .shoe-features strong {
+            color: #333;
+        }
+
+        .btn-restart {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-top: 20px;
+        }
+
+        .btn-restart:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏀 Find Your Perfect Basketball Shoes</h1>
+            <p>Answer 8 quick questions to get personalized recommendations</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <!-- Question 1 -->
+        <div class="question-container active" data-question="1">
+            <div class="question-number">Question 1 of 8</div>
+            <div class="question-text">What's your primary playing position?</div>
+            <div class="options">
+                <div class="option" data-value="guard">Point Guard / Shooting Guard</div>
+                <div class="option" data-value="wing">Small Forward / Wing</div>
+                <div class="option" data-value="forward">Power Forward</div>
+                <div class="option" data-value="center">Center</div>
+            </div>
+            <div class="buttons">
+                <button class="btn btn-next" disabled>Next</button>
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="question-container" data-question="2">
+            <div class="question-number">Question 2 of 8</div>
+            <div class="question-text">What's your playing style?</div>
+            <div class="options">
+                <div class="option" data-value="speed">Speed & quickness (fast breaks, cuts)</div>
+                <div class="option" data-value="explosive">Explosive & athletic (high jumps, dunks)</div>
+                <div class="option" data-value="power">Physical & powerful (post play, rebounds)</div>
+                <div class="option" data-value="versatile">Versatile all-around game</div>
+            </div>
+            <div class="buttons">
+                <button class="btn btn-back">Back</button>
+                <button class="btn btn-next" disabled>Next</button>
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="question-container" data-question="3">
+            <div class="question-number">Question 3 of 8</div>
+            <div class="question-text">How much ankle support do you prefer?</div>
+            <div class="options">
+                <div class="option" data-value="low">Low-top (maximum mobility)</div>
+                <div class="option" data-value="mid">Mid-top (balanced support & mobility)</div>
+                <div class="option" data-value="high">High-top (maximum ankle support)</div>
+            </div>
+            <div class="buttons">
+                <button class="btn btn-back">Back</button>
+                <button class="btn btn-next" disabled>Next</button>
+            </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="question-container" data-question="4">
+            <div class="question-number">Question 4 of 8</div>
+            <div class="question-text">What type of cushioning do you prefer?</div>
+            <div class="options">
+                <div class="option" data-value="responsive">Responsive & court feel (firm, low to ground)</div>
+                <div class="option" data-value="balanced">Balanced (mix of comfort & responsiveness)</div>
+                <div class="option" data-value="plush">Plush & maximum impact protection</div>
+            </div>
+            <div class="buttons">
+                <button class="btn btn-back">Back</button>
+                <button class="btn btn-next" disabled>Next</button>
+            </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="question-container" data-question="5">
+            <div class="question-number">Question 5 of 8</div>
+            <div class="question-text">How do you prefer your shoes to fit?</div>
+            <div class="options">
+                <div class="option" data-value="snug">Snug & locked-in (like a second skin)</div>
+                <div class="option" data-value="true">True to size with some room</div>
+                <div class="option" data-value="roomy">Roomy & comfortable (wider feet friendly)</div>
+            </div>
+            <div class="buttons">
+                <button class="btn btn-back">Back</button>
+                <button class="btn btn-next" disabled>Next</button>
+            </div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="question-container" data-question="6">
+            <div class="question-number">Question 6 of 8</div>
+            <div class="question-text">What's your budget range?</div>
+            <div class="options">
+                <div class="option" data-value="budget">Under $100</div>
+                <div class="option" data-value="mid">$100-$150</div>
+                <div class="option" data-value="premium">$150-$200</div>
+                <div class="option" data-value="luxury">$200+ (flagship models)</div>
+            </div>
+            <div class="buttons">
+                <button class="btn btn-back">Back</button>
+                <button class="btn btn-next" disabled>Next</button>
+            </div>
+        </div>
+
+        <!-- Question 7 -->
+        <div class="question-container" data-question="7">
+            <div class="question-number">Question 7 of 8</div>
+            <div class="question-text">What type of court do you play on most?</div>
+            <div class="options">
+                <div class="option" data-value="indoor">Indoor only</div>
+                <div class="option" data-value="outdoor">Outdoor only</div>
+                <div class="option" data-value="both">Both indoor & outdoor</div>
+            </div>
+            <div class="buttons">
+                <button class="btn btn-back">Back</button>
+                <button class="btn btn-next" disabled>Next</button>
+            </div>
+        </div>
+
+        <!-- Question 8 -->
+        <div class="question-container" data-question="8">
+            <div class="question-number">Question 8 of 8</div>
+            <div class="question-text">What's most important to you in a shoe?</div>
+            <div class="options">
+                <div class="option" data-value="performance">Pure performance & technology</div>
+                <div class="option" data-value="comfort">All-day comfort</div>
+                <div class="option" data-value="durability">Durability & longevity</div>
+                <div class="option" data-value="style">Style & aesthetics</div>
+            </div>
+            <div class="buttons">
+                <button class="btn btn-back">Back</button>
+                <button class="btn btn-next" disabled>Get Recommendations</button>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div class="results" id="results">
+            <h2>Your Perfect Basketball Shoes</h2>
+            <p class="results-intro">Based on your answers, here are your top recommendations:</p>
+            <div id="recommendationsList"></div>
+            <button class="btn btn-restart" onclick="restartQuiz()">Take Quiz Again</button>
+        </div>
+    </div>
+
+    <script>
+        let currentQuestion = 1;
+        const totalQuestions = 8;
+        const answers = {};
+
+        // Shoe database with detailed attributes
+        const shoeDatabase = [
+            {
+                name: "Nike LeBron 21",
+                positions: ["forward", "center", "wing"],
+                styles: ["power", "versatile", "explosive"],
+                support: ["high", "mid"],
+                cushioning: ["plush", "balanced"],
+                fit: ["true", "roomy"],
+                budget: ["premium", "luxury"],
+                court: ["indoor", "both"],
+                priority: ["performance", "comfort"],
+                features: "Cushlon foam + Air Zoom, great lockdown, versatile for power players"
+            },
+            {
+                name: "Nike KD 17",
+                positions: ["wing", "forward", "guard"],
+                styles: ["versatile", "speed", "explosive"],
+                support: ["low", "mid"],
+                cushioning: ["responsive", "balanced"],
+                fit: ["snug", "true"],
+                budget: ["premium", "luxury"],
+                court: ["indoor", "both"],
+                priority: ["performance", "style"],
+                features: "Full-length Cushlon 3.0, lightweight, excellent for versatile scorers"
+            },
+            {
+                name: "Nike Ja 2",
+                positions: ["guard"],
+                styles: ["speed", "explosive"],
+                support: ["low"],
+                cushioning: ["responsive"],
+                fit: ["snug", "true"],
+                budget: ["mid", "premium"],
+                court: ["indoor", "both"],
+                priority: ["performance", "style"],
+                features: "Zoom Air Strobel, ultra-responsive, built for quick guards"
+            },
+            {
+                name: "Nike GT Cut 3",
+                positions: ["guard", "wing"],
+                styles: ["speed", "versatile"],
+                support: ["low"],
+                cushioning: ["responsive", "balanced"],
+                fit: ["snug", "true"],
+                budget: ["premium", "luxury"],
+                court: ["indoor"],
+                priority: ["performance"],
+                features: "ZoomX foam, superb traction, ideal for cutters and quick movements"
+            },
+            {
+                name: "Adidas Trae Young 3",
+                positions: ["guard"],
+                styles: ["speed", "explosive"],
+                support: ["low", "mid"],
+                cushioning: ["responsive", "balanced"],
+                fit: ["true"],
+                budget: ["mid", "premium"],
+                court: ["indoor", "both"],
+                priority: ["performance", "style"],
+                features: "Lightstrike cushioning, excellent traction, designed for shifty guards"
+            },
+            {
+                name: "Nike Sabrina 2",
+                positions: ["guard", "wing"],
+                styles: ["versatile", "speed"],
+                support: ["low", "mid"],
+                cushioning: ["balanced"],
+                fit: ["true", "snug"],
+                budget: ["mid", "premium"],
+                court: ["indoor", "both"],
+                priority: ["performance", "comfort"],
+                features: "Cushlon foam, great all-around performance, excellent value"
+            },
+            {
+                name: "Air Jordan 39",
+                positions: ["guard", "wing", "forward"],
+                styles: ["versatile", "explosive", "speed"],
+                support: ["mid", "low"],
+                cushioning: ["responsive", "balanced"],
+                fit: ["true"],
+                budget: ["luxury", "premium"],
+                court: ["indoor"],
+                priority: ["performance", "style"],
+                features: "Formula 23 foam, premium materials, iconic Jordan heritage"
+            },
+            {
+                name: "Nike G.T. Jump 2",
+                positions: ["forward", "center"],
+                styles: ["explosive", "power"],
+                support: ["mid", "high"],
+                cushioning: ["plush", "balanced"],
+                fit: ["true", "roomy"],
+                budget: ["luxury", "premium"],
+                court: ["indoor"],
+                priority: ["performance"],
+                features: "Double-stacked Zoom Air, maximum impact protection, built for jumpers"
+            },
+            {
+                name: "Puma All-Pro Nitro",
+                positions: ["guard", "wing"],
+                styles: ["speed", "versatile"],
+                support: ["low"],
+                cushioning: ["responsive"],
+                fit: ["true"],
+                budget: ["mid"],
+                court: ["indoor", "both"],
+                priority: ["performance", "durability"],
+                features: "Nitro foam, excellent value, great traction and responsiveness"
+            },
+            {
+                name: "New Balance TWO WXY v5",
+                positions: ["guard", "wing"],
+                styles: ["speed", "versatile"],
+                support: ["low", "mid"],
+                cushioning: ["responsive", "balanced"],
+                fit: ["roomy", "true"],
+                budget: ["mid", "premium"],
+                court: ["indoor", "both"],
+                priority: ["performance", "comfort"],
+                features: "FuelCell cushioning, wide-foot friendly, excellent stability"
+            },
+            {
+                name: "Under Armour Curry 12",
+                positions: ["guard"],
+                styles: ["speed", "explosive"],
+                support: ["low"],
+                cushioning: ["responsive"],
+                fit: ["snug", "true"],
+                budget: ["premium", "luxury"],
+                court: ["indoor"],
+                priority: ["performance", "style"],
+                features: "UA Flow cushioning, no-rubber outsole, elite court feel for shooters"
+            },
+            {
+                name: "Adidas Dame 9",
+                positions: ["guard"],
+                styles: ["speed", "explosive"],
+                support: ["low", "mid"],
+                cushioning: ["responsive", "balanced"],
+                fit: ["true"],
+                budget: ["mid", "premium"],
+                court: ["indoor", "both"],
+                priority: ["performance", "durability"],
+                features: "Bounce Pro cushioning, excellent traction, built for explosive guards"
+            },
+            {
+                name: "Nike Giannis Immortality 4",
+                positions: ["forward", "wing"],
+                styles: ["power", "versatile", "explosive"],
+                support: ["mid"],
+                cushioning: ["balanced"],
+                fit: ["true", "roomy"],
+                budget: ["budget", "mid"],
+                court: ["outdoor", "both"],
+                priority: ["durability", "performance"],
+                features: "Durable rubber outsole, great outdoor shoe, excellent value for power players"
+            },
+            {
+                name: "Nike PG 6",
+                positions: ["guard", "wing"],
+                styles: ["versatile", "speed"],
+                support: ["low"],
+                cushioning: ["responsive", "balanced"],
+                fit: ["true"],
+                budget: ["mid"],
+                court: ["indoor", "both"],
+                priority: ["performance", "comfort"],
+                features: "Air Strobel unit, good all-around performance, solid mid-tier option"
+            },
+            {
+                name: "Anta KT9",
+                positions: ["guard", "wing"],
+                styles: ["speed", "explosive"],
+                support: ["low", "mid"],
+                cushioning: ["responsive"],
+                fit: ["true"],
+                budget: ["mid"],
+                court: ["indoor", "both"],
+                priority: ["performance", "style"],
+                features: "A-Flashfoam, excellent traction, great value international brand"
+            },
+            {
+                name: "Li-Ning Way of Wade 11",
+                positions: ["guard", "wing"],
+                styles: ["versatile", "speed"],
+                support: ["mid"],
+                cushioning: ["balanced"],
+                fit: ["true"],
+                budget: ["mid", "premium"],
+                court: ["indoor", "both"],
+                priority: ["performance", "style"],
+                features: "Boom cushioning, premium materials, unique design aesthetic"
+            },
+            {
+                name: "Nike Zoom Freak 5",
+                positions: ["forward", "wing"],
+                styles: ["power", "explosive", "versatile"],
+                support: ["mid"],
+                cushioning: ["balanced"],
+                fit: ["true", "roomy"],
+                budget: ["mid"],
+                court: ["both", "outdoor"],
+                priority: ["durability", "performance"],
+                features: "Zoom Air, durable construction, great for outdoor and versatile forwards"
+            },
+            {
+                name: "Adidas AE 1",
+                positions: ["guard", "wing"],
+                styles: ["speed", "versatile"],
+                support: ["low"],
+                cushioning: ["responsive"],
+                fit: ["true"],
+                budget: ["mid"],
+                court: ["indoor", "both"],
+                priority: ["performance", "durability"],
+                features: "Lightstrike cushioning, excellent traction, built for quick first steps"
+            },
+            {
+                name: "Jordan Luka 3",
+                positions: ["guard"],
+                styles: ["speed", "versatile"],
+                support: ["low", "mid"],
+                cushioning: ["responsive", "balanced"],
+                fit: ["true"],
+                budget: ["premium", "luxury"],
+                court: ["indoor"],
+                priority: ["performance", "style"],
+                features: "Formula 23 foam, IsoPlate technology, designed for shifty playmakers"
+            },
+            {
+                name: "Nike LeBron NXXT Gen",
+                positions: ["forward", "wing", "guard"],
+                styles: ["versatile", "explosive"],
+                support: ["low"],
+                cushioning: ["responsive"],
+                fit: ["snug", "true"],
+                budget: ["luxury", "premium"],
+                court: ["indoor"],
+                priority: ["performance", "style"],
+                features: "ZoomX + Zoom Air, lightweight design, premium innovation for all positions"
+            }
+        ];
+
+        // Initialize event listeners
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', function() {
+                const container = this.closest('.question-container');
+                const questionNum = container.getAttribute('data-question');
+                
+                // Remove selected from siblings
+                container.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+                
+                // Add selected to clicked option
+                this.classList.add('selected');
+                
+                // Store answer
+                answers[`q${questionNum}`] = this.getAttribute('data-value');
+                
+                // Enable next button
+                container.querySelector('.btn-next').disabled = false;
+            });
+        });
+
+        // Next button handlers
+        document.querySelectorAll('.btn-next').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (currentQuestion < totalQuestions) {
+                    currentQuestion++;
+                    showQuestion(currentQuestion);
+                } else {
+                    showResults();
+                }
+            });
+        });
+
+        // Back button handlers
+        document.querySelectorAll('.btn-back').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (currentQuestion > 1) {
+                    currentQuestion--;
+                    showQuestion(currentQuestion);
+                }
+            });
+        });
+
+        function showQuestion(questionNum) {
+            document.querySelectorAll('.question-container').forEach(q => q.classList.remove('active'));
+            document.querySelector(`[data-question="${questionNum}"]`).classList.add('active');
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const progress = (currentQuestion / totalQuestions) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function calculateRecommendations() {
+            const scored = shoeDatabase.map(shoe => {
+                let score = 0;
+                
+                // Position match (high weight)
+                if (shoe.positions.includes(answers.q1)) score += 25;
+                
+                // Playing style match (high weight)
+                if (shoe.styles.includes(answers.q2)) score += 25;
+                
+                // Support match (medium weight)
+                if (shoe.support.includes(answers.q3)) score += 15;
+                
+                // Cushioning match (medium weight)
+                if (shoe.cushioning.includes(answers.q4)) score += 15;
+                
+                // Fit match (medium weight)
+                if (shoe.fit.includes(answers.q5)) score += 10;
+                
+                // Budget match (critical)
+                if (shoe.budget.includes(answers.q6)) score += 20;
+                else score -= 15; // Penalize if out of budget
+                
+                // Court match (medium weight)
+                if (shoe.court.includes(answers.q7)) score += 10;
+                
+                // Priority match (medium weight)
+                if (shoe.priority.includes(answers.q8)) score += 15;
+                
+                return { shoe, score };
+            });
+            
+            // Sort by score and return top 3
+            scored.sort((a, b) => b.score - a.score);
+            return scored.slice(0, 3).map(item => item.shoe);
+        }
+
+        function showResults() {
+            const recommendations = calculateRecommendations();
+            const resultsContainer = document.getElementById('recommendationsList');
+            
+            resultsContainer.innerHTML = '';
+            
+            recommendations.forEach((shoe, index) => {
+                const div = document.createElement('div');
+                div.className = 'shoe-recommendation';
+                
+                let reason = '';
+                if (index === 0) {
+                    reason = `This is your best match! Perfect for ${answers.q1} players with a ${answers.q2} playing style. `;
+                } else if (index === 1) {
+                    reason = `An excellent alternative that matches your ${answers.q3}-top preference and ${answers.q4} cushioning needs. `;
+                } else {
+                    reason = `Great option that fits your ${answers.q6} budget and works well on ${answers.q7} courts. `;
+                }
+                
+                div.innerHTML = `
+                    <div class="shoe-name">${index + 1}. ${shoe.name}</div>
+                    <div class="shoe-reason">${reason}</div>
+                    <div class="shoe-features"><strong>Key Features:</strong> ${shoe.features}</div>
+                `;
+                
+                resultsContainer.appendChild(div);
+            });
+            
+            document.querySelectorAll('.question-container').forEach(q => q.classList.remove('active'));
+            document.getElementById('results').classList.add('active');
+        }
+
+        function restartQuiz() {
+            currentQuestion = 1;
+            Object.keys(answers).forEach(key => delete answers[key]);
+            
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelectorAll('.btn-next').forEach(btn => btn.disabled = true);
+            
+            document.getElementById('results').classList.remove('active');
+            showQuestion(1);
+        }
+
+        // Initialize progress bar
+        updateProgress();
+    </script>
+</body>
+</html>
